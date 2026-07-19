@@ -282,8 +282,12 @@ export function ExamBoard({ courseId }: { courseId: string }) {
             {includeBalance && (
               <div>
                 <div className="balance-labels">
-                  <span>マーク {markWritingBalance}%</span>
-                  <span>記述 {100 - markWritingBalance}%</span>
+                  <span className="mark-label">マーク {markWritingBalance}%</span>
+                  <span className="writing-label">記述 {100 - markWritingBalance}%</span>
+                </div>
+                <div className="balance-track" aria-hidden="true">
+                  <span className="mark-balance" style={{ width: `${markWritingBalance}%` }} />
+                  <span className="writing-balance" style={{ width: `${100 - markWritingBalance}%` }} />
                 </div>
                 <input
                   className="balance-range"
@@ -332,11 +336,12 @@ export function ExamBoard({ courseId }: { courseId: string }) {
               {report.mark_writing_balance != null && (
                 <div className="balance-display">
                   <div className="balance-labels">
-                    <span>マーク {report.mark_writing_balance}%</span>
-                    <span>記述 {100 - report.mark_writing_balance}%</span>
+                    <span className="mark-label">マーク {report.mark_writing_balance}%</span>
+                    <span className="writing-label">記述 {100 - report.mark_writing_balance}%</span>
                   </div>
                   <div className="balance-track">
-                    <span style={{ width: `${report.mark_writing_balance}%` }} />
+                    <span className="mark-balance" style={{ width: `${report.mark_writing_balance}%` }} />
+                    <span className="writing-balance" style={{ width: `${100 - report.mark_writing_balance}%` }} />
                   </div>
                 </div>
               )}

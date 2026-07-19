@@ -24,6 +24,8 @@
   --star: #c28a16;
   --intensity: #d11242;
   --difficulty: #d67818;
+  --mark-balance: #dd7418;
+  --writing-balance: #3578b8;
   color-scheme: light;
 }
 
@@ -49,6 +51,8 @@
   --star: #f0b94c;
   --intensity: #ff2058;
   --difficulty: #f39a3f;
+  --mark-balance: #f39a3f;
+  --writing-balance: #68a9e6;
   color-scheme: dark;
 }
 
@@ -1033,10 +1037,22 @@ a {
   font-size: 11px;
 }
 
+.balance-labels .mark-label {
+  color: var(--mark-balance);
+  font-weight: 700;
+}
+
+.balance-labels .writing-label {
+  color: var(--writing-balance);
+  font-weight: 700;
+}
+
 .balance-range {
+  width: 100%;
+  margin-top: 8px;
   height: 18px !important;
   padding: 0 !important;
-  accent-color: var(--steel);
+  accent-color: var(--mark-balance);
 }
 
 .submit-wide {
@@ -1094,13 +1110,22 @@ a {
 .balance-track {
   height: 5px;
   overflow: hidden;
-  background: var(--difficulty);
+  display: flex;
+  background: var(--line);
 }
 
 .balance-track span {
   display: block;
   height: 100%;
-  background: var(--steel);
+  transition: width 120ms ease;
+}
+
+.balance-track .mark-balance {
+  background: var(--mark-balance);
+}
+
+.balance-track .writing-balance {
+  background: var(--writing-balance);
 }
 
 .exam-footer {
