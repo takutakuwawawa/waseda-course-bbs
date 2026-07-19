@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
+import { ArrowLeft, CalendarDays, ChevronRight, Clock3, Search, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCourses, getFaculties } from '../lib/catalog'
@@ -6,6 +6,25 @@ import type { Course, Faculty } from '../types/catalog'
 import { StatusNotice } from '../components/StatusNotice'
 
 const PAGE_SIZE = 50
+const DAYS = [
+  { value: 1, label: '月曜日' },
+  { value: 2, label: '火曜日' },
+  { value: 3, label: '水曜日' },
+  { value: 4, label: '木曜日' },
+  { value: 5, label: '金曜日' },
+  { value: 6, label: '土曜日' },
+  { value: 7, label: '日曜日' },
+]
+const PERIODS = [1, 2, 3, 4, 5, 6, 7]
+const PRIMARY_TERM_ORDER = [
+  '春学期',
+  '春クォーター',
+  '夏クォーター',
+  '秋学期',
+  '秋クォーター',
+  '冬クォーター',
+]
+const PRIMARY_TERM_RANK = new Map(PRIMARY_TERM_ORDER.map((item, index) => [item, index]))
 
 export function FacultyPage() {
   const { facultySlug = '' } = useParams()
@@ -13,6 +32,8 @@ export function FacultyPage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [query, setQuery] = useState('')
   const [term, setTerm] = useState('')
+  const [day, setDay] = useState('')
+  const [period, setPeriod] = useState('')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,23 +54,53 @@ export function FacultyPage() {
 
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
-  }, [query, term])
+  }, [query, term, day, period])
 
   const terms = useMemo(
-    () => [...new Set(courses.map((course) => course.term).filter((value): value is string => Boolean(value)))].sort(),
+    () => [...new Set(courses.map((course) => course.term).filter((value): value is string => Boolean(value)))].sort(
+      (left, right) => {
+        const leftRank = PRIMARY_TERM_RANK.get(left)
+        const rightRank = PRIMARY_TERM_RANK.get(right)
+        if (leftRank != null && rightRank != null) return leftRank - rightRank
+        if (leftRank != null) return -1
+        if (rightRank != null) return 1
+        return left.localeCompare(right, 'ja-JP')
+      },
+    ),
     [courses],
   )
+  const primaryTerms = terms.filter((item) => PRIMARY_TERM_RANK.has(item))
+  const specialTerms = terms.filter((item) => !PRIMARY_TERM_RANK.has(item))
 
   const filteredCourses = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('ja-JP')
+    const selectedDay = day ? Number(day) : null
+    const selectedPeriod = period ? Number(period) : null
     return courses.filter((course) => {
       if (term && course.term !== term) return false
+      if (
+        (selectedDay || selectedPeriod) &&
+        !(course.slots ?? []).some(
+          (slot) =>
+            (!selectedDay || slot.day === selectedDay) &&
+            (!selectedPeriod || slot.period === selectedPeriod),
+        )
+      ) return false
       if (!normalizedQuery) return true
       return [course.name, course.teacher, course.code]
         .filter(Boolean)
         .some((value) => value!.toLocaleLowerCase('ja-JP').includes(normalizedQuery))
     })
-  }, [courses, query, term])
+  }, [courses, query, term, day, period])
+
+  const hasFilters = Boolean(query || term || day || period)
+
+  function clearFilters() {
+    setQuery('')
+    setTerm('')
+    setDay('')
+    setPeriod('')
+  }
 
   return (
     <div className="content-column">
@@ -77,7 +128,30 @@ export function FacultyPage() {
           <SlidersHorizontal size={17} />
           <select value={term} onChange={(event) => setTerm(event.target.value)} aria-label="学期で絞り込む">
             <option value="">すべての学期</option>
-            {terms.map((item) => <option key={item}>{item}</option>)}
+            {primaryTerms.length > 0 && (
+              <optgroup label="通常の学期・クォーター">
+                {primaryTerms.map((item) => <option key={item}>{item}</option>)}
+              </optgroup>
+            )}
+            {specialTerms.length > 0 && (
+              <optgroup label="集中・その他">
+                {specialTerms.map((item) => <option key={item}>{item}</option>)}
+              </optgroup>
+            )}
+          </select>
+        </label>
+        <label className="select-field">
+          <CalendarDays size={17} />
+          <select value={day} onChange={(event) => setDay(event.target.value)} aria-label="曜日で絞り込む">
+            <option value="">すべての曜日</option>
+            {DAYS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+          </select>
+        </label>
+        <label className="select-field">
+          <Clock3 size={17} />
+          <select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="時限で絞り込む">
+            <option value="">すべての時限</option>
+            {PERIODS.map((item) => <option key={item} value={item}>{item}限</option>)}
           </select>
         </label>
       </div>
@@ -86,7 +160,7 @@ export function FacultyPage() {
 
       <div className="list-summary">
         <strong>{filteredCourses.length.toLocaleString()}件</strong>
-        {(query || term) && <button type="button" onClick={() => { setQuery(''); setTerm('') }}>条件をクリア</button>}
+        {hasFilters && <button type="button" onClick={clearFilters}>条件をクリア</button>}
       </div>
 
       {loading ? (

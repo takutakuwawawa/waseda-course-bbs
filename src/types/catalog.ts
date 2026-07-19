@@ -13,7 +13,13 @@ export type Course = {
   facultySlug: string
   term: string | null
   schedule: string | null
+  slots?: CourseSlot[]
   credits: number | null
   methodType: string | null
   year: number | null
+}
+
+export type CourseSlot = {
+  day: number
+  period: number
 }

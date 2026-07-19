@@ -49,6 +49,21 @@ PUBLIC_FIELDS = {
     "method_type",
 }
 
+DAY_MAP = {day: index for index, day in enumerate("月火水木金土日", start=1)}
+KANJI_NUM_MAP = {
+    "一": 1,
+    "二": 2,
+    "三": 3,
+    "四": 4,
+    "五": 5,
+    "六": 6,
+    "七": 7,
+}
+ZEN_TO_HAN = str.maketrans("０１２３４５６７８９①②③④⑤⑥⑦", "01234567891234567")
+SLOT_PATTERN = re.compile(
+    r"([月火水木金土日])\s*([1-7一二三四五六七])\s*(?:時限目|限目|時限|限)?"
+)
+
 
 def faculty_slug_from_filename(path: Path) -> str | None:
     match = re.match(r"(.+)_(spring|fall)\.csv$", path.name)
@@ -60,6 +75,26 @@ def faculty_slug_from_filename(path: Path) -> str | None:
 
 def text(value: str | None) -> str:
     return (value or "").strip()
+
+
+def parse_schedule(schedule: str | None) -> list[dict[str, int]]:
+    normalized = text(schedule).translate(ZEN_TO_HAN)
+    if not normalized:
+        return []
+
+    slots: list[dict[str, int]] = []
+    seen: set[tuple[int, int]] = set()
+    for day_label, period_label in SLOT_PATTERN.findall(normalized):
+        day = DAY_MAP[day_label]
+        period = KANJI_NUM_MAP.get(period_label)
+        if period is None:
+            period = int(period_label)
+        key = (day, period)
+        if key in seen:
+            continue
+        seen.add(key)
+        slots.append({"day": day, "period": period})
+    return slots
 
 
 def public_id(row: dict[str, str], faculty_slug: str) -> str:
@@ -114,6 +149,7 @@ def build_catalog(source: Path, output: Path) -> None:
                         "facultySlug": faculty_slug,
                         "term": text(row.get("term")) or None,
                         "schedule": text(row.get("schedule")) or None,
+                        "slots": parse_schedule(row.get("schedule")),
                         "credits": credits,
                         "methodType": text(row.get("method_type")) or None,
                         "year": int(text(row.get("year")) or 0) or None,
