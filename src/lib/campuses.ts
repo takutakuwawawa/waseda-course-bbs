@@ -8,7 +8,15 @@ export const CAMPUSES: Campus[] = [
   {
     slug: 'waseda',
     label: '早稲田キャンパス',
-    facultySlugs: ['law', 'education', 'commerce', 'social_sciences', 'global_education'],
+    facultySlugs: [
+      'politics_economics',
+      'law',
+      'education',
+      'commerce',
+      'social_sciences',
+      'international',
+      'global_education',
+    ],
   },
   {
     slug: 'toyama',
@@ -18,7 +26,12 @@ export const CAMPUSES: Campus[] = [
   {
     slug: 'tokorozawa',
     label: '所沢キャンパス',
-    facultySlugs: ['sport_sciences'],
+    facultySlugs: ['human_sciences', 'sport_sciences', 'human_correspondence'],
+  },
+  {
+    slug: 'nishiwaseda',
+    label: '西早稲田キャンパス',
+    facultySlugs: ['fundamental_sci', 'creative_sci', 'advanced_sci'],
   },
 ]
 

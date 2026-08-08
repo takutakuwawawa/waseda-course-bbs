@@ -17,6 +17,7 @@ export type Course = {
   credits: number | null
   methodType: string | null
   year: number | null
+  syllabusUrl: string | null
 }
 
 export type CourseSlot = {

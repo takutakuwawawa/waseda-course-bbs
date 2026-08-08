@@ -9,6 +9,7 @@ import json
 import re
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import urlencode
 
 
 DEFAULT_SOURCE = Path(__file__).resolve().parents[2] / "waseda-classes" / "scraper"
@@ -76,6 +77,14 @@ def faculty_slug_from_filename(path: Path) -> str | None:
 
 def text(value: str | None) -> str:
     return (value or "").strip()
+
+
+def syllabus_url(p_key: str | None) -> str | None:
+    key = text(p_key)
+    if not key:
+        return None
+    query = urlencode({"pKey": key, "pLng": "jp"})
+    return f"https://www.wsl.waseda.jp/syllabus/JAA104.php?{query}"
 
 
 def parse_schedule(schedule: str | None) -> list[dict[str, int]]:
@@ -166,6 +175,7 @@ def build_catalog(sources: list[Path], output: Path) -> None:
                         "credits": credits,
                         "methodType": text(row.get("method_type")) or None,
                         "year": int(text(row.get("year")) or 0) or None,
+                        "syllabusUrl": syllabus_url(row.get("p_key")),
                     }
                 )
 

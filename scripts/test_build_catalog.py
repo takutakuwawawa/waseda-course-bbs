@@ -59,6 +59,10 @@ class CatalogBuildTests(unittest.TestCase):
             self.assertEqual(len(law), 1)
             self.assertEqual(len(education), 1)
             self.assertEqual(law[0]["id"], education[0]["id"])
+            self.assertEqual(
+                law[0]["syllabusUrl"],
+                "https://www.wsl.waseda.jp/syllabus/JAA104.php?pKey=shared-key&pLng=jp",
+            )
 
     def test_later_source_overrides_same_csv_filename(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

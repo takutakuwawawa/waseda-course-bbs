@@ -94,6 +94,8 @@ export function DirectoryPage() {
             .map((slug) => faculties.find((faculty) => faculty.slug === slug))
             .filter((faculty): faculty is Faculty => Boolean(faculty))
 
+          if (campusFaculties.length === 0) return null
+
           return (
             <section className="campus-section" key={campus.slug}>
               <h2>{campus.label}</h2>

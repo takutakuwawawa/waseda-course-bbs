@@ -59,7 +59,7 @@ export function CoursePage() {
         </div>
         <a
           className="official-link"
-          href="https://www.wsl.waseda.jp/syllabus/JAA101.php?pLng=jp"
+          href={course.syllabusUrl ?? 'https://www.wsl.waseda.jp/syllabus/JAA101.php?pLng=jp'}
           target="_blank"
           rel="noreferrer"
         >
