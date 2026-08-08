@@ -16,10 +16,12 @@ type SortMode = 'new' | 'helpful'
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    weekday: 'short',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
   }).format(new Date(value))
 }
 
@@ -74,6 +76,10 @@ export function BbsBoard({ courseId }: { courseId: string }) {
       (a, b) => b.like_count - b.dislike_count - (a.like_count - a.dislike_count),
     )
   }, [posts, sortMode])
+  const postNumberById = useMemo(
+    () => Object.fromEntries(posts.map((post, index) => [post.id, posts.length - index])),
+    [posts],
+  )
 
   async function submitPost(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -148,31 +154,6 @@ export function BbsBoard({ courseId }: { courseId: string }) {
 
   return (
     <section className="board-stack" aria-label="BBS">
-      <form className="composer" onSubmit={submitPost}>
-        <div className="composer-heading">
-          <div>
-            <strong>この授業について投稿</strong>
-            <span>同じ科目では同じ匿名名が表示されます</span>
-          </div>
-          <span className="character-count">{body.length}/1000</span>
-        </div>
-        <textarea
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          maxLength={1000}
-          rows={4}
-          placeholder="課題、履修の相談、授業の進み方など"
-          aria-label="BBS投稿本文"
-        />
-        <div className="composer-actions">
-          <p>個人情報や誹謗中傷は投稿しないでください。</p>
-          <button className="primary-button" type="submit" disabled={!body.trim() || submitting}>
-            <Send size={16} />
-            {submitting ? '送信中' : '投稿する'}
-          </button>
-        </div>
-      </form>
-
       {message && <StatusNotice>{message}</StatusNotice>}
 
       <div className="board-toolbar">
@@ -196,14 +177,15 @@ export function BbsBoard({ courseId }: { courseId: string }) {
         <div className="empty-state">まだ投稿はありません。最初の話題を書いてみましょう。</div>
       ) : (
         <ol className="post-list">
-          {sortedPosts.map((post, index) => (
+          {sortedPosts.map((post) => (
             <li className="post-item" key={post.id}>
               <div className="post-meta">
-                <div>
-                  <span className="post-number">#{posts.length - index}</span>
-                  <strong>{post.anon_label}</strong>
-                </div>
+                <span className="post-number">{postNumberById[post.id]}</span>
+                <span>：</span>
+                <strong>名無しさん</strong>
+                <span>：</span>
                 <time dateTime={post.created_at}>{formatDate(post.created_at)}</time>
+                <span className="post-id">ID:{post.anon_label.replace(/^匿名-/, '')}</span>
               </div>
               <p className="post-body">{post.body}</p>
               <div className="post-actions">
@@ -246,6 +228,31 @@ export function BbsBoard({ courseId }: { courseId: string }) {
           ))}
         </ol>
       )}
+
+      <form className="composer" onSubmit={submitPost}>
+        <div className="composer-heading">
+          <div>
+            <strong>書き込む</strong>
+            <span>同じ科目では同じIDが表示されます</span>
+          </div>
+          <span className="character-count">{body.length}/1000</span>
+        </div>
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          maxLength={1000}
+          rows={5}
+          placeholder="課題、履修の相談、授業の進み方など"
+          aria-label="BBS投稿本文"
+        />
+        <div className="composer-actions">
+          <p>個人情報や誹謗中傷は投稿しないでください。</p>
+          <button className="primary-button" type="submit" disabled={!body.trim() || submitting}>
+            <Send size={16} />
+            {submitting ? '送信中' : '書き込む'}
+          </button>
+        </div>
+      </form>
     </section>
   )
 }

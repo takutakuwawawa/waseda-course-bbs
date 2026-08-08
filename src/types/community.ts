@@ -26,3 +26,11 @@ export type ExamReport = {
   mark_writing_balance: number | null
   created_at: string
 }
+
+export type LoungeThread = {
+  id: string
+  campus_slug: string
+  title: string
+  reply_count: number
+  created_at: string
+}

@@ -1,7 +1,7 @@
-import { ArrowLeft, CalendarDays, ChevronRight, Clock3, Search, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCourses, getFaculties } from '../lib/catalog'
+import { getCampusForFaculty } from '../lib/campuses'
 import type { Course, Faculty } from '../types/catalog'
 import { StatusNotice } from '../components/StatusNotice'
 
@@ -94,6 +94,7 @@ export function FacultyPage() {
   }, [courses, query, term, day, period])
 
   const hasFilters = Boolean(query || term || day || period)
+  const campus = getCampusForFaculty(facultySlug)
 
   function clearFilters() {
     setQuery('')
@@ -103,20 +104,22 @@ export function FacultyPage() {
   }
 
   return (
-    <div className="content-column">
-      <Link className="back-link" to="/"><ArrowLeft size={16} /> 学部一覧</Link>
-      <section className="page-intro faculty-intro">
-        <div>
-          <span className="eyebrow">FACULTY</span>
-          <h1>{faculty?.label ?? '科目一覧'}</h1>
-          <p>科目名・教員名・科目コードから探せます。</p>
-        </div>
-        {faculty && <div className="intro-stat"><strong>{faculty.courseCount.toLocaleString()}</strong><span>科目</span></div>}
-      </section>
+    <div className="board-page faculty-page">
+      <nav className="breadcrumbs" aria-label="現在位置">
+        <Link to="/">わせチャン</Link>
+        <span> &gt; </span>
+        <Link to="/">{campus?.label ?? '学部一覧'}</Link>
+        <span> &gt; {faculty?.label ?? '科目一覧'}</span>
+      </nav>
+
+      <header className="board-title-bar">
+        <h1>{faculty?.label ?? '科目一覧'}</h1>
+        <span>科目別掲示板</span>
+      </header>
 
       <div className="course-filter-bar">
         <label className="search-field">
-          <Search size={18} />
+          <span>検索</span>
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -125,7 +128,7 @@ export function FacultyPage() {
           />
         </label>
         <label className="select-field">
-          <SlidersHorizontal size={17} />
+          <span>学期</span>
           <select value={term} onChange={(event) => setTerm(event.target.value)} aria-label="学期で絞り込む">
             <option value="">すべての学期</option>
             {primaryTerms.length > 0 && (
@@ -141,14 +144,14 @@ export function FacultyPage() {
           </select>
         </label>
         <label className="select-field">
-          <CalendarDays size={17} />
+          <span>曜日</span>
           <select value={day} onChange={(event) => setDay(event.target.value)} aria-label="曜日で絞り込む">
             <option value="">すべての曜日</option>
             {DAYS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
           </select>
         </label>
         <label className="select-field">
-          <Clock3 size={17} />
+          <span>時限</span>
           <select value={period} onChange={(event) => setPeriod(event.target.value)} aria-label="時限で絞り込む">
             <option value="">すべての時限</option>
             {PERIODS.map((item) => <option key={item} value={item}>{item}限</option>)}
@@ -159,7 +162,7 @@ export function FacultyPage() {
       {error && <StatusNotice>{error}</StatusNotice>}
 
       <div className="list-summary">
-        <strong>{filteredCourses.length.toLocaleString()}件</strong>
+        <strong>全部 {Math.min(visibleCount, filteredCourses.length).toLocaleString()} / {filteredCourses.length.toLocaleString()}</strong>
         {hasFilters && <button type="button" onClick={clearFilters}>条件をクリア</button>}
       </div>
 
@@ -168,24 +171,26 @@ export function FacultyPage() {
       ) : filteredCourses.length === 0 ? (
         <div className="empty-state">条件に一致する科目がありません。</div>
       ) : (
-        <div className="course-list">
-          {filteredCourses.slice(0, visibleCount).map((course) => (
-            <Link className="course-row" to={`/faculty/${facultySlug}/course/${course.id}`} key={course.id}>
+        <ol className="course-list" start={1}>
+          {filteredCourses.slice(0, visibleCount).map((course, index) => (
+            <li className="course-row" key={course.id}>
+              <span className="course-number">{index + 1}</span>
               <div className="course-main">
-                <h2>{course.name}</h2>
-                <p>{course.teacher ?? '教員未定'}</p>
-                <div className="course-meta">
+                <h2>
+                  <Link to={`/faculty/${facultySlug}/course/${course.id}`}>{course.name}</Link>
+                </h2>
+                <p>
+                  <span>{course.teacher ?? '教員未定'}</span>
                   {course.term && <span>{course.term}</span>}
                   {course.schedule && <span>{course.schedule}</span>}
                   {course.credits != null && <span>{course.credits}単位</span>}
                   {course.methodType && <span>{course.methodType.replace(/[【】]/g, '')}</span>}
-                </div>
+                </p>
               </div>
-              <div className="course-code">{course.code || 'コード未登録'}</div>
-              <ChevronRight size={19} />
-            </Link>
+              <span className="course-code">{course.code || 'コード未登録'}</span>
+            </li>
           ))}
-        </div>
+        </ol>
       )}
 
       {visibleCount < filteredCourses.length && (

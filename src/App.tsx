@@ -3,6 +3,7 @@ import { AppShell } from './components/AppShell'
 import { CoursePage } from './pages/CoursePage'
 import { DirectoryPage } from './pages/DirectoryPage'
 import { FacultyPage } from './pages/FacultyPage'
+import { LoungePage, LoungeThreadPage } from './pages/LoungePage'
 
 export default function App() {
   return (
@@ -12,6 +13,8 @@ export default function App() {
           <Route path="/" element={<DirectoryPage />} />
           <Route path="/faculty/:facultySlug" element={<FacultyPage />} />
           <Route path="/faculty/:facultySlug/course/:courseId" element={<CoursePage />} />
+          <Route path="/campus/:campusSlug/lounge" element={<LoungePage />} />
+          <Route path="/campus/:campusSlug/lounge/:threadId" element={<LoungeThreadPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

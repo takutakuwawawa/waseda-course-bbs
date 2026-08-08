@@ -1,13 +1,17 @@
-import { ArrowRight, BookOpenText, Building2, MessageSquareText } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { getFaculties } from '../lib/catalog'
-import type { Faculty } from '../types/catalog'
+import { getCourses, getFaculties } from '../lib/catalog'
+import { CAMPUSES } from '../lib/campuses'
+import type { Course, Faculty } from '../types/catalog'
 import { StatusNotice } from '../components/StatusNotice'
 
 export function DirectoryPage() {
   const [faculties, setFaculties] = useState<Faculty[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState<Course[]>([])
+  const [searching, setSearching] = useState(false)
+  const [hasSearched, setHasSearched] = useState(false)
 
   useEffect(() => {
     getFaculties().then(setFaculties).catch((reason: unknown) => {
@@ -15,52 +19,103 @@ export function DirectoryPage() {
     })
   }, [])
 
+  async function searchCourses(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const normalizedQuery = query.trim().toLocaleLowerCase('ja-JP')
+    if (!normalizedQuery) {
+      setResults([])
+      setHasSearched(false)
+      return
+    }
+
+    setSearching(true)
+    setError(null)
+    try {
+      const courseGroups = await Promise.all(faculties.map((faculty) => getCourses(faculty.slug)))
+      const matches = courseGroups
+        .flat()
+        .filter((course) =>
+          [course.name, course.teacher, course.code]
+            .filter(Boolean)
+            .some((value) => value!.toLocaleLowerCase('ja-JP').includes(normalizedQuery)),
+        )
+        .slice(0, 50)
+      setResults(matches)
+      setHasSearched(true)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : '科目を検索できませんでした')
+    } finally {
+      setSearching(false)
+    }
+  }
+
   return (
-    <div className="content-column directory-page">
-      <section className="page-intro compact-intro">
-        <div>
-          <span className="eyebrow">COURSE DIRECTORY</span>
-          <h1>科目を探す</h1>
-          <p>学部を選び、授業ごとの掲示板やテスト情報を確認できます。</p>
-        </div>
-        <div className="intro-stat" aria-label="収録科目数">
-          <strong>{faculties.reduce((sum, faculty) => sum + faculty.courseCount, 0).toLocaleString()}</strong>
-          <span>科目</span>
-        </div>
+    <div className="entrance-page">
+      <section className="entrance-heading">
+        <h1>早稲田大学 科目別掲示板</h1>
+        <p>学部を選ぶと、科目ごとの掲示板とテスト情報を見られます。</p>
       </section>
 
-      <div className="section-heading">
-        <div>
-          <Building2 size={18} />
-          <h2>学部・センター</h2>
-        </div>
-        <span>{faculties.length}区分</span>
-      </div>
+      <form className="entrance-search" onSubmit={searchCourses}>
+        <label>
+          <span className="sr-only">科目・教員名を検索</span>
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="科目名・教員名・科目コード"
+          />
+        </label>
+        <button type="submit" disabled={searching || !query.trim()}>{searching ? '検索中' : '検索'}</button>
+      </form>
 
       {error && <StatusNotice>{error}</StatusNotice>}
 
-      <div className="faculty-grid">
-        {faculties.map((faculty) => (
-          <Link className="faculty-item" to={`/faculty/${faculty.slug}`} key={faculty.slug}>
-            <div className="faculty-icon" aria-hidden="true">
-              <BookOpenText size={21} />
-            </div>
-            <div>
-              <strong>{faculty.label}</strong>
-              <span>{faculty.courseCount.toLocaleString()}科目</span>
-            </div>
-            <ArrowRight size={18} />
-          </Link>
-        ))}
+      {hasSearched && (
+        <section className="entrance-results">
+          <h2>検索結果（{results.length}件・最大50件）</h2>
+          {results.length === 0 ? (
+            <p>一致する科目がありません。</p>
+          ) : (
+            <ol>
+              {results.map((course) => (
+                <li key={`${course.facultySlug}:${course.id}`}>
+                  <Link to={`/faculty/${course.facultySlug}/course/${course.id}`}>{course.name}</Link>
+                  <span>{course.faculty}　{course.teacher ?? '教員未定'}</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
+      )}
+
+      <div className="campus-directory">
+        {CAMPUSES.map((campus) => {
+          const campusFaculties = campus.facultySlugs
+            .map((slug) => faculties.find((faculty) => faculty.slug === slug))
+            .filter((faculty): faculty is Faculty => Boolean(faculty))
+
+          return (
+            <section className="campus-section" key={campus.slug}>
+              <h2>{campus.label}</h2>
+              <ul>
+                {campusFaculties.map((faculty) => (
+                  <li key={faculty.slug}>
+                    <Link to={`/faculty/${faculty.slug}`}>{faculty.label}</Link>
+                    <span>（{faculty.courseCount.toLocaleString()}）</span>
+                  </li>
+                ))}
+                <li className="lounge-link">
+                  <Link to={`/campus/${campus.slug}/lounge`}>喫煙所</Link>
+                </li>
+              </ul>
+            </section>
+          )
+        })}
       </div>
 
-      <section className="community-note">
-        <MessageSquareText size={21} />
-        <div>
-          <strong>授業内容ではなく、学生の情報交換が中心です</strong>
-          <p>公式シラバスの転載は行わず、科目を探すために必要な基本情報だけを掲載します。</p>
-        </div>
-      </section>
+      <p className="entrance-note">
+        科目ページは情報交換のための固定掲示板です。自由な話題は各キャンパスの喫煙所を利用してください。
+      </p>
     </div>
   )
 }

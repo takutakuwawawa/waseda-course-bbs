@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 DEFAULT_SOURCE = Path(__file__).resolve().parents[2] / "waseda-classes" / "scraper"
+DEFAULT_OVERLAY_SOURCE = DEFAULT_SOURCE / "catalog"
 DEFAULT_OUTPUT = Path(__file__).resolve().parents[1] / "public" / "data"
 
 FACULTY_LABELS = {
@@ -112,11 +113,23 @@ def public_id(row: dict[str, str], faculty_slug: str) -> str:
     return hashlib.sha256(source.encode("utf-8")).hexdigest()[:20]
 
 
-def build_catalog(source: Path, output: Path) -> None:
-    courses_by_faculty: dict[str, list[dict[str, object]]] = defaultdict(list)
-    seen_ids: set[str] = set()
+def source_csv_files(sources: list[Path]) -> list[Path]:
+    """Return one CSV per filename, with later sources overriding earlier ones."""
+    selected: dict[str, Path] = {}
+    for source in sources:
+        if not source.exists():
+            continue
+        for csv_path in sorted(source.glob("*.csv")):
+            if faculty_slug_from_filename(csv_path):
+                selected[csv_path.name] = csv_path
+    return [selected[name] for name in sorted(selected)]
 
-    for csv_path in sorted(source.glob("*.csv")):
+
+def build_catalog(sources: list[Path], output: Path) -> None:
+    courses_by_faculty: dict[str, list[dict[str, object]]] = defaultdict(list)
+    seen_ids_by_faculty: dict[str, set[str]] = defaultdict(set)
+
+    for csv_path in source_csv_files(sources):
         faculty_slug = faculty_slug_from_filename(csv_path)
         if not faculty_slug:
             continue
@@ -129,9 +142,9 @@ def build_catalog(source: Path, output: Path) -> None:
 
             for row in reader:
                 course_id = public_id(row, faculty_slug)
-                if course_id in seen_ids:
+                if course_id in seen_ids_by_faculty[faculty_slug]:
                     continue
-                seen_ids.add(course_id)
+                seen_ids_by_faculty[faculty_slug].add(course_id)
 
                 raw_credits = text(row.get("credits"))
                 try:
@@ -186,15 +199,24 @@ def build_catalog(source: Path, output: Path) -> None:
     )
     print(f"Built {sum(len(value) for value in courses_by_faculty.values()):,} courses")
     print(f"Faculties: {len(faculties)}")
+    for faculty in faculties:
+        print(f"  - {faculty['label']}: {faculty['courseCount']:,}")
     print(f"Output: {output}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument(
+        "--source",
+        action="append",
+        type=Path,
+        dest="sources",
+        help="CSV directory. Repeat to add an overlay; later sources win.",
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()
-    build_catalog(args.source.resolve(), args.output.resolve())
+    sources = args.sources or [DEFAULT_SOURCE, DEFAULT_OVERLAY_SOURCE]
+    build_catalog([source.resolve() for source in sources], args.output.resolve())
 
 
 if __name__ == "__main__":

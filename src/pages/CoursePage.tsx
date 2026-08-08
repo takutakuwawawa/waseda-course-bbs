@@ -1,10 +1,11 @@
-import { ArrowLeft, ExternalLink, MessageSquareText, NotebookTabs } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BbsBoard } from '../components/BbsBoard'
 import { ExamBoard } from '../components/ExamBoard'
 import { StatusNotice } from '../components/StatusNotice'
 import { getCourses } from '../lib/catalog'
+import { getCampusForFaculty } from '../lib/campuses'
 import type { Course } from '../types/catalog'
 
 type DetailTab = 'bbs' | 'exam'
@@ -34,22 +35,27 @@ export function CoursePage() {
     return <div className="content-column"><div className="empty-state">読み込み中...</div></div>
   }
 
+  const campus = getCampusForFaculty(facultySlug)
+
   return (
-    <div className="content-column detail-page">
-      <Link className="back-link" to={`/faculty/${facultySlug}`}><ArrowLeft size={16} /> {course.faculty}</Link>
+    <div className="board-page detail-page">
+      <nav className="breadcrumbs" aria-label="現在位置">
+        <Link to="/">わせチャン</Link>
+        <span> &gt; {campus?.label ?? '学部'} &gt; </span>
+        <Link to={`/faculty/${facultySlug}`}>{course.faculty}</Link>
+        <span> &gt; {course.name}</span>
+      </nav>
 
       <header className="course-header">
-        <div className="course-header-topline">
-          <span>{course.year ? `${course.year}年度` : '開講年度未登録'}</span>
-          <span>{course.code || '科目コード未登録'}</span>
-        </div>
         <h1>{course.name}</h1>
-        <p className="course-teacher">{course.teacher ?? '教員未定'}</p>
         <div className="course-detail-meta">
+          <span>担当：{course.teacher ?? '教員未定'}</span>
           {course.term && <span>{course.term}</span>}
           {course.schedule && <span>{course.schedule}</span>}
           {course.credits != null && <span>{course.credits}単位</span>}
           {course.methodType && <span>{course.methodType.replace(/[【】]/g, '')}</span>}
+          <span>{course.year ? `${course.year}年度` : '開講年度未登録'}</span>
+          <span>{course.code || '科目コード未登録'}</span>
         </div>
         <a
           className="official-link"
@@ -69,7 +75,7 @@ export function CoursePage() {
           className={activeTab === 'bbs' ? 'active' : ''}
           onClick={() => setActiveTab('bbs')}
         >
-          <MessageSquareText size={18} /> BBS
+          掲示板
         </button>
         <button
           type="button"
@@ -78,7 +84,7 @@ export function CoursePage() {
           className={activeTab === 'exam' ? 'active' : ''}
           onClick={() => setActiveTab('exam')}
         >
-          <NotebookTabs size={18} /> テスト情報
+          テスト情報
         </button>
       </div>
 
