@@ -1048,11 +1048,56 @@ a {
 }
 
 .balance-range {
+  --balance-value: 50%;
   width: 100%;
   margin-top: 8px;
-  height: 18px !important;
+  height: 20px !important;
   padding: 0 !important;
-  accent-color: var(--mark-balance);
+  border: 0 !important;
+  appearance: none;
+  background: transparent !important;
+  cursor: pointer;
+}
+
+.balance-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--mark-balance) 0 var(--balance-value),
+    var(--writing-balance) var(--balance-value) 100%
+  );
+}
+
+.balance-range::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -6px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  appearance: none;
+  background: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.balance-range::-moz-range-track {
+  height: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--mark-balance) 0 var(--balance-value),
+    var(--writing-balance) var(--balance-value) 100%
+  );
+}
+
+.balance-range::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  background: var(--text);
+  box-shadow: 0 0 0 1px var(--line-strong);
 }
 
 .submit-wide {

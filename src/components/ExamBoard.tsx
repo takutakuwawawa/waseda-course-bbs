@@ -1,5 +1,5 @@
 import { Diamond, Flag, Send, Star } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
 import { ensureAnonymousSession, isSupabaseConfigured, supabase } from '../lib/supabase'
 import { getErrorMessage } from '../lib/errors'
 import type { ExamReport } from '../types/community'
@@ -285,10 +285,6 @@ export function ExamBoard({ courseId }: { courseId: string }) {
                   <span className="mark-label">マーク {markWritingBalance}%</span>
                   <span className="writing-label">記述 {100 - markWritingBalance}%</span>
                 </div>
-                <div className="balance-track" aria-hidden="true">
-                  <span className="mark-balance" style={{ width: `${markWritingBalance}%` }} />
-                  <span className="writing-balance" style={{ width: `${100 - markWritingBalance}%` }} />
-                </div>
                 <input
                   className="balance-range"
                   type="range"
@@ -296,6 +292,7 @@ export function ExamBoard({ courseId }: { courseId: string }) {
                   max="100"
                   value={markWritingBalance}
                   onChange={(event) => setMarkWritingBalance(Number(event.target.value))}
+                  style={{ '--balance-value': `${markWritingBalance}%` } as CSSProperties}
                 />
               </div>
             )}
