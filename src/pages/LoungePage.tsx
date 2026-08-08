@@ -91,7 +91,9 @@ export function LoungePage() {
     <div className="board-page lounge-page">
       <nav className="breadcrumbs" aria-label="現在位置">
         <Link to="/">わせチャン</Link>
-        <span> &gt; {campus.label} &gt; 喫煙所</span>
+        <span> &gt; </span>
+        <Link to="/boards">{campus.label}</Link>
+        <span> &gt; 喫煙所</span>
       </nav>
 
       <header className="board-title-bar">
@@ -174,7 +176,9 @@ export function LoungeThreadPage() {
     <div className="board-page detail-page">
       <nav className="breadcrumbs" aria-label="現在位置">
         <Link to="/">わせチャン</Link>
-        <span> &gt; {campus.label} &gt; </span>
+        <span> &gt; </span>
+        <Link to="/boards">{campus.label}</Link>
+        <span> &gt; </span>
         <Link to={`/campus/${campus.slug}/lounge`}>喫煙所</Link>
         {thread && <span> &gt; {thread.title}</span>}
       </nav>

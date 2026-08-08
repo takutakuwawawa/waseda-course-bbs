@@ -41,7 +41,9 @@ export function CoursePage() {
     <div className="board-page detail-page">
       <nav className="breadcrumbs" aria-label="現在位置">
         <Link to="/">わせチャン</Link>
-        <span> &gt; {campus?.label ?? '学部'} &gt; </span>
+        <span> &gt; </span>
+        <Link to="/boards">{campus?.label ?? '学部'}</Link>
+        <span> &gt; </span>
         <Link to={`/faculty/${facultySlug}`}>{course.faculty}</Link>
         <span> &gt; {course.name}</span>
       </nav>

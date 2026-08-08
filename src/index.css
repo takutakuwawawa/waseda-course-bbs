@@ -70,6 +70,145 @@ a:visited {
   flex-direction: column;
 }
 
+.portal-shell {
+  min-height: 100vh;
+}
+
+.portal-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  background: #ffffff;
+}
+
+.portal-nav {
+  min-height: 44px;
+  padding: 10px 22px;
+  border-bottom: 1px solid #cccccc;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.portal-main {
+  position: relative;
+  min-height: 500px;
+  padding: 90px 20px 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.portal-mascot {
+  position: absolute;
+  width: min(460px, 72vw);
+  height: auto;
+  opacity: 0.13;
+  pointer-events: none;
+  transform: translateY(22px);
+}
+
+.portal-logo {
+  position: relative;
+  z-index: 1;
+  width: min(390px, 78vw);
+  height: auto;
+}
+
+.portal-main p {
+  position: relative;
+  z-index: 1;
+  margin: 12px 0 27px;
+  color: #555555;
+  font-size: 13px;
+}
+
+.portal-enter {
+  position: relative;
+  z-index: 1;
+  padding: 7px 22px;
+  border: 1px solid #888888;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.portal-footer {
+  padding: 20px 24px 26px;
+  border-top: 1px solid #cccccc;
+  font-size: 11px;
+  text-align: center;
+}
+
+.portal-footer p {
+  margin: 3px 0;
+}
+
+.portal-footer div {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.guide-page {
+  width: min(760px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 34px 0 64px;
+  line-height: 1.9;
+}
+
+.guide-page > header {
+  padding-bottom: 17px;
+  border-bottom: 1px solid #aaaaaa;
+}
+
+.guide-page h1 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.guide-page header p,
+.guide-updated {
+  color: #666666;
+  font-size: 12px;
+}
+
+.guide-page section {
+  padding: 19px 0 17px;
+  border-bottom: 1px solid #dddddd;
+}
+
+.guide-page h2 {
+  margin: 0 0 8px;
+  color: var(--section);
+  font-size: 16px;
+}
+
+.guide-page p,
+.guide-page li {
+  font-size: 14px;
+}
+
+.guide-page p {
+  margin: 8px 0;
+}
+
+.guide-page ul {
+  margin: 9px 0;
+  padding-left: 24px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 11px;
+}
+
 .site-header {
   border-bottom: 1px solid #cccccc;
   background: #ffffff;
@@ -1293,6 +1432,30 @@ a:visited {
   .site-footer {
     flex-direction: column;
     gap: 8px;
+  }
+
+  .portal-nav {
+    padding-inline: 12px;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .portal-main {
+    min-height: 430px;
+    padding-top: 60px;
+  }
+
+  .portal-mascot {
+    width: min(380px, 88vw);
+  }
+
+  .guide-page {
+    width: calc(100% - 24px);
+    padding-top: 22px;
+  }
+
+  .footer-links {
+    justify-content: flex-start;
   }
 }
 

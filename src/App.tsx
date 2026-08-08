@@ -3,6 +3,8 @@ import { AppShell } from './components/AppShell'
 import { CoursePage } from './pages/CoursePage'
 import { DirectoryPage } from './pages/DirectoryPage'
 import { FacultyPage } from './pages/FacultyPage'
+import { GuidePage } from './pages/GuidePage'
+import { EntrancePage } from './pages/EntrancePage'
 import { LoungePage, LoungeThreadPage } from './pages/LoungePage'
 
 export default function App() {
@@ -10,7 +12,9 @@ export default function App() {
     <HashRouter>
       <AppShell>
         <Routes>
-          <Route path="/" element={<DirectoryPage />} />
+          <Route path="/" element={<EntrancePage />} />
+          <Route path="/boards" element={<DirectoryPage />} />
+          <Route path="/guide" element={<GuidePage />} />
           <Route path="/faculty/:facultySlug" element={<FacultyPage />} />
           <Route path="/faculty/:facultySlug/course/:courseId" element={<CoursePage />} />
           <Route path="/campus/:campusSlug/lounge" element={<LoungePage />} />

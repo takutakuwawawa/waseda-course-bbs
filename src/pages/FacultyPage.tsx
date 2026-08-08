@@ -108,7 +108,7 @@ export function FacultyPage() {
       <nav className="breadcrumbs" aria-label="現在位置">
         <Link to="/">わせチャン</Link>
         <span> &gt; </span>
-        <Link to="/">{campus?.label ?? '学部一覧'}</Link>
+        <Link to="/boards">{campus?.label ?? '学部一覧'}</Link>
         <span> &gt; {faculty?.label ?? '科目一覧'}</span>
       </nav>
 
