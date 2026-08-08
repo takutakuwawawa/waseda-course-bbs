@@ -10,6 +10,7 @@ import { ensureAnonymousSession, isSupabaseConfigured, supabase } from '../lib/s
 import { getErrorMessage } from '../lib/errors'
 import type { BbsPost, VoteChoice } from '../types/community'
 import { StatusNotice } from './StatusNotice'
+import { PostingPolicyNotice } from './PostingPolicyNotice'
 
 type SortMode = 'new' | 'helpful'
 
@@ -218,6 +219,8 @@ export function BbsBoard({ courseId }: { courseId: string }) {
               {reportingPostId === post.id && (
                 <div className="report-menu" aria-label="通報理由">
                   <span>理由を選択</span>
+                  <button type="button" onClick={() => void report(post.id, 'threat')}>犯罪予告・緊急性</button>
+                  <button type="button" onClick={() => void report(post.id, 'illegal')}>違法行為</button>
                   <button type="button" onClick={() => void report(post.id, 'harassment')}>誹謗中傷</button>
                   <button type="button" onClick={() => void report(post.id, 'personal_info')}>個人情報</button>
                   <button type="button" onClick={() => void report(post.id, 'spam')}>宣伝・連投</button>
@@ -246,7 +249,7 @@ export function BbsBoard({ courseId }: { courseId: string }) {
           aria-label="BBS投稿本文"
         />
         <div className="composer-actions">
-          <p>個人情報や誹謗中傷は投稿しないでください。</p>
+          <PostingPolicyNotice />
           <button className="primary-button" type="submit" disabled={!body.trim() || submitting}>
             <Send size={16} />
             {submitting ? '送信中' : '書き込む'}

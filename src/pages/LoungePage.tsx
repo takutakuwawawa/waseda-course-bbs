@@ -6,6 +6,7 @@ import { getCampus } from '../lib/campuses'
 import { getErrorMessage } from '../lib/errors'
 import { ensureAnonymousSession, isSupabaseConfigured, supabase } from '../lib/supabase'
 import type { LoungeThread } from '../types/community'
+import { PostingPolicyNotice } from '../components/PostingPolicyNotice'
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('ja-JP', {
@@ -120,6 +121,7 @@ export function LoungePage() {
             最初の書き込み
             <textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={1000} rows={4} />
           </label>
+          <PostingPolicyNotice />
           <button className="primary-button" type="submit" disabled={submitting || !title.trim() || !body.trim()}>
             {submitting ? '作成中' : 'スレッドを作る'}
           </button>

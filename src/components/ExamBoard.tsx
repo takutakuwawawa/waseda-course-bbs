@@ -4,6 +4,7 @@ import { ensureAnonymousSession, isSupabaseConfigured, supabase } from '../lib/s
 import { getErrorMessage } from '../lib/errors'
 import type { ExamReport } from '../types/community'
 import { StatusNotice } from './StatusNotice'
+import { PostingPolicyNotice } from './PostingPolicyNotice'
 
 const CURRENT_YEAR = new Date().getFullYear()
 const YEARS = Array.from({ length: 10 }, (_, index) => CURRENT_YEAR - index)
@@ -298,6 +299,7 @@ export function ExamBoard({ courseId }: { courseId: string }) {
             )}
           </div>
 
+          <PostingPolicyNotice />
           <button className="primary-button submit-wide" type="submit" disabled={submitting}>
             <Send size={16} /> {submitting ? '送信中' : '投稿する'}
           </button>
